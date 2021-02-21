@@ -1,6 +1,6 @@
 FROM python:3.7
 #FROM ubuntu:18.04
-LABEL purpose="vc-base"
+LABEL purpose="vc-desktop"
 LABEL version="alpha-0.1"
 
 ENV DIR_DOCKER=.
@@ -13,17 +13,6 @@ ENV TZ="Asia/Tokyo"
 RUN apt-get update -y -q
 RUN apt-get install -y -q --no-install-recommends \
     tzdata
-RUN apt-get install -y -q --no-install-recommends \
-    wget \
-    vim
-
-# C++ layer
-RUN apt-get install -y -q --no-install-recommends\
-    build-essential \
-    cmake \
-    clang \
-    libssl-dev
-
 # Audio Layer
 RUN apt-get install -y -q --no-install-recommends \
     pulseaudio

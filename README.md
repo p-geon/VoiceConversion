@@ -1,8 +1,3 @@
 # VoiceConversion
 
-## run cpp test file
-
-```
-make br
-make cpp
-```
+- paper with code: https://paperswithcode.com/task/voice-conversion/latest
