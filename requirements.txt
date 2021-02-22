@@ -1,2 +1,4 @@
 librosa==0.8.0
 pyworld==0.2.12
+PyAudio==0.2.11
+voice-robotifier==1.1

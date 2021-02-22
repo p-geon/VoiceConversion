@@ -12,10 +12,13 @@ COPY ${DIR_DOCKER}/requirements.txt ./
 ENV TZ="Asia/Tokyo"
 RUN apt-get update -y -q
 RUN apt-get install -y -q --no-install-recommends \
-    tzdata
+    tzdata \
+    wget
 # Audio Layer
 RUN apt-get install -y -q --no-install-recommends \
-    pulseaudio
+    pulseaudio \
+    portaudio19-dev
+
 
 # Python Layer
 RUN pip install -q --upgrade pip
