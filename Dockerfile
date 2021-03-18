@@ -1,7 +1,7 @@
 FROM python:3.7
 #FROM ubuntu:18.04
 LABEL purpose="vc-desktop"
-LABEL version="alpha-0.1"
+LABEL version="alpha-0.2"
 
 ENV DIR_DOCKER=.
 ENV DEBCONF_NOWARNINGS yes
@@ -11,27 +11,29 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY ${DIR_DOCKER}/requirements.txt ./
 ENV TZ="Asia/Tokyo"
 RUN apt-get update -y -q
-# ---
+RUN apt-get install -y -q --no-install-recommends tzdata
 RUN apt-get install -y -q --no-install-recommends \
-    tzdata \
-    wget
-	
+    wget \
+	tmux
 # Audio Layer
+#> pulseaudio: コネクション
+#> alsa-utils: aplayに必要
 RUN apt-get install -y -q --no-install-recommends \
     pulseaudio \
-    portaudio19-dev \
-	socat \
-	alsa-utils \
-	ffmpeg \
-	tmux
+	alsa-utils
+##socat \
+##ffmpeg \
 
 # Python Layer
 RUN pip install -q --upgrade pip
+RUN apt-get install -y -q --no-install-recommends \
+	portaudio19-dev
 RUN pip install -r requirements.txt -q
 
-
 # finalize
-ARG EXPOSED_PORT
-EXPOSE ${EXPOSED_PORT}
+##ARG EXPOSED_PORT
+##EXPOSE ${EXPOSED_PORT}
 WORKDIR /work
 CMD ["/bin/bash"]
+
+## 60±5sec (mac)

@@ -1,55 +1,61 @@
 export NAME_CONTAINER=hyperpigeon/vc_base
 export PWD=`pwd`
-export EXPOSED_PORT=3000
+#export EXPOSED_PORT=3000
+
 # ====================
 # Core
 # ====================
-br:
+br: ## [docker] build & run
 	@make b
 	@make r
 
-b: ## build notebook & lab 
+b: ## [docker] build container
 	docker build -f ./Dockerfile \
-		-t $(NAME_CONTAINER) . \
-		--build-arg EXPOSED_PORT=$(EXPOSED_PORT)
+		-t $(NAME_CONTAINER) .
+#--build-arg EXPOSED_PORT=$(EXPOSED_PORT)
 
-r: ## run jupyter notebook
+ring: ## [docker] run sound
 	docker run -it --rm \
 		-v $(PWD):/work/ \
 		-v ~/.config/pulse:/root/.config/pulse \
 		-e PULSE_SERVER=docker.for.mac.localhost \
 		$(NAME_CONTAINER) \
-		/bin/bash
-
-app: ## run jupyter notebook
+		make aplay
+r: 
+	make ring
+	
+app: ## [docker] run script
 	docker run -it --rm \
 		-v $(PWD):/work/ \
-		-p $(EXPOSED_PORT):$(EXPOSED_PORT) \
+		-v ~/.config/pulse:/root/.config/pulse \
+		-e PULSE_SERVER=docker.for.mac.localhost \
 		$(NAME_CONTAINER) \
 		python scripts/check_audio_io.py
+
 # ====================
 # Audio commands
 # ====================
 export SOUNDFILE=./src/pc.wav
-# ↑ mp3は鳴らない
+# ↑ mp3は鳴らない(というかバグる)
 
 # for Ubuntu
-audio-env: ## check Audio card
+audio-env: ## [sound] check Audio card
 	aplay -l
-aplay: ## for Ubuntu
+aplay: ## [sound] ringing sound, framerate(44.1kHz), channels(2)
 	aplay $(SOUNDFILE) -r 44100 -c 2
 # ---
 # for mac
-play-on-mac: ## for mac
+play-on-mac: ## [sound] ringing for mac
 	afplay $(SOUNDFILE)
 setup-mac:
 	brew install sox
 	brew install pulseaudio
 	brew services start pulseaudio
-run-host: ## receive container sound
+run-host: ## [sound] connect container->mac
 	pulseaudio --load=module-native-protocol-tcp \
 		--exit-idle-time=-1 --daemon
-	pulseaudio --check -v
+		pulseaudio --check -v
+
 # ====================
 # docker commands
 # ====================
@@ -66,6 +72,5 @@ clean-containers:
 # ====================
 # General Purpose
 # ====================
-.PHONY: help
 help: ## this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
