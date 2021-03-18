@@ -11,19 +11,27 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY ${DIR_DOCKER}/requirements.txt ./
 ENV TZ="Asia/Tokyo"
 RUN apt-get update -y -q
+# ---
 RUN apt-get install -y -q --no-install-recommends \
     tzdata \
     wget
+	
 # Audio Layer
 RUN apt-get install -y -q --no-install-recommends \
     pulseaudio \
-    portaudio19-dev
-
+    portaudio19-dev \
+	socat \
+	alsa-utils \
+	ffmpeg \
+	tmux
 
 # Python Layer
 RUN pip install -q --upgrade pip
 RUN pip install -r requirements.txt -q
 
+
 # finalize
+ARG EXPOSED_PORT
+EXPOSE ${EXPOSED_PORT}
 WORKDIR /work
-ENTRYPOINT ["/bin/bash"]
+CMD ["/bin/bash"]
