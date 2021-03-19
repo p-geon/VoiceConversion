@@ -29,14 +29,18 @@ RUN apt-get install -y -q --no-install-recommends \
 RUN pip install -r requirements.txt -q
 
 # additional layers
-#RUN apt-get install -y -q alsa-base alsa-utils
 RUN apt-get install -y -q --no-install-recommends \
 	socat \
 	alsa-utils
 
 # conf
 COPY ./config/.tmux.conf /root/.tmux.conf
-USER root
+
+
+ENV USER_DOCKER=pigeolian
+RUN useradd -m ${USER_DOCKER}
+RUN gpasswd -a ${USER_DOCKER} sudo
+USER ${USER_DOCKER}
 
 # finalize
 ARG EXPOSED_PORT

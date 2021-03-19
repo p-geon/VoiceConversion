@@ -15,17 +15,16 @@ r:
 # ---
 build: ## [docker] build container
 	docker build -f ./Dockerfile \
-		--build-arg EXPOSED_PORT=$(EXPOSED_PORT) \
+		--build-arg EXPOSED_PORT=3000 \
 		-t $(NAME_CONTAINER) .
 
-export EXPOSED_PORT=3000
 export MEM_LIMIT=1300m
 define run
 	docker run -it --rm \
 		-v $(PWD):/work/ \
 		-v ~/.config/pulse:/root/.config/pulse \
 		-e PULSE_SERVER=docker.for.mac.localhost \
-		-p 127.0.0.1:$(EXPOSED_PORT):$(EXPOSED_PORT) \
+		-p 127.0.0.1:3000:3000 \
 		--hostname=$(HOSTNAME) \
 		--shm-size=$(MEM_LIMIT) \
 		$(NAME_CONTAINER) \
@@ -55,25 +54,28 @@ runner: ## [tmux]
 # --------------------------------------------------------
 # TEST
 # --------------------------------------------------------
-# host
-rec:
-	rec --encoding signed-integer -traw --bits 16 --channels 2 --rate 44100 - | nc 127.0.0.1 3000 > /dev/null
+# make a, b, c
+# make d
 
 # container
-in:
-	docker build -t mictest -f ./Dockerfile.test .
-	docker run -p 127.0.0.1:3000:3000 -v $(PWD):/work -it mictest
-container:
+a:
+	make build
+	make run
+b:
 	@pulseaudio -D --exit-idle-time=-1
 	@pacmd load-module module-pipe-source file=/dev/audio format=s16 rate=44100 channels=2
 	@socat tcp-listen:3000 file:/dev/audio &
-	@python scripts/vc_to_f.py
+c1:
+	arecord /work/test.wav
+c2:
+	python3 scripts/vc_to_f.py
+d:
+	rec --encoding signed-integer -traw --bits 16 --channels 2 --rate 44100 - | nc 127.0.0.1 3000 > /dev/null
 #@arecord ./test.wav
 # ====================
 # Audio commands
 # ====================
-export SOUNDFILE=test.wav
-#./src/pc.wav
+export SOUNDFILE=./src/pc.wav
 # ↑ mp3は鳴らない(というかバグる)
 
 # for Ubuntu
