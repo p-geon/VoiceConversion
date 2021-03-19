@@ -1,7 +1,7 @@
 FROM python:3.7
 #FROM ubuntu:18.04
 LABEL purpose="vc-desktop"
-LABEL version="alpha-0.2"
+LABEL version="alpha-0.2.1"
 
 ENV DIR_DOCKER=.
 ENV DEBCONF_NOWARNINGS yes
@@ -19,8 +19,7 @@ RUN apt-get install -y -q --no-install-recommends \
 #> pulseaudio: コネクション
 #> alsa-utils: aplayに必要
 RUN apt-get install -y -q --no-install-recommends \
-    pulseaudio \
-	alsa-utils
+    pulseaudio
 
 # Python Layer
 RUN pip install -q --upgrade pip
@@ -30,21 +29,19 @@ RUN pip install -r requirements.txt -q
 
 # additional layers
 RUN apt-get install -y -q --no-install-recommends \
-	socat \
 	alsa-utils
+#	socat \
 
 # conf
-COPY ./config/.tmux.conf /root/.tmux.conf
-
-
-ENV USER_DOCKER=pigeolian
-RUN useradd -m ${USER_DOCKER}
-RUN gpasswd -a ${USER_DOCKER} sudo
-USER ${USER_DOCKER}
+#COPY ./config/.tmux.conf /root/.tmux.conf
+#ENV USER_DOCKER=pigeolian
+#RUN useradd -m ${USER_DOCKER}
+#RUN gpasswd -a ${USER_DOCKER} sudo
+#USER ${USER_DOCKER}
 
 # finalize
-ARG EXPOSED_PORT
-EXPOSE ${EXPOSED_PORT}
+#ARG EXPOSED_PORT
+EXPOSE 3000
 WORKDIR /work
 CMD ["/bin/bash"]
 

@@ -14,17 +14,18 @@ r:
 
 # ---
 build: ## [docker] build container
-	docker build -f ./Dockerfile \
-		--build-arg EXPOSED_PORT=3000 \
-		-t $(NAME_CONTAINER) .
+	docker build -f ./Dockerfile -t $(NAME_CONTAINER) .
+full-build: ## [docker] build container
+	docker build -f ./Dockerfile -t $(NAME_CONTAINER) . --no-cache
+#--build-arg EXPOSED_PORT=3000 \
 
 export MEM_LIMIT=1300m
 define run
 	docker run -it --rm \
-		-v $(PWD):/work/ \
-		-v ~/.config/pulse:/root/.config/pulse \
 		-e PULSE_SERVER=docker.for.mac.localhost \
 		-p 127.0.0.1:3000:3000 \
+		-v $(PWD):/work/ \
+		-v ~/.config/pulse:/root/.config/pulse \
 		--hostname=$(HOSTNAME) \
 		--shm-size=$(MEM_LIMIT) \
 		$(NAME_CONTAINER) \
