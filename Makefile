@@ -1,46 +1,79 @@
 export NAME_CONTAINER=hyperpigeon/vc_base
 export PWD=`pwd`
-#export EXPOSED_PORT=3000
-
+export HOSTNAME=pigeon
 # ====================
-# Core
+# Host
 # ====================
 br: ## [docker] build & run
 	@make b
 	@make r
+b:
+	make build
+r:
+	make run
 
-b: ## [docker] build container
+# ---
+build: ## [docker] build container
 	docker build -f ./Dockerfile \
+		--build-arg EXPOSED_PORT=$(EXPOSED_PORT) \
 		-t $(NAME_CONTAINER) .
 
+export EXPOSED_PORT=3000
+export MEM_LIMIT=1300m
 define run
 	docker run -it --rm \
 		-v $(PWD):/work/ \
 		-v ~/.config/pulse:/root/.config/pulse \
 		-e PULSE_SERVER=docker.for.mac.localhost \
-		--device=/dev/snd \
+		-p 127.0.0.1:$(EXPOSED_PORT):$(EXPOSED_PORT) \
+		--hostname=$(HOSTNAME) \
+		--shm-size=$(MEM_LIMIT) \
 		$(NAME_CONTAINER) \
 		$(1)
 endef
-r: ## [docker] alias
-	make ring
 
+run: ## [docker] alias
+	$(call run, /bin/bash)
 ring: ## [docker] run sound
 	$(call run, make aplay)
 app: ## [docker] run script
 	#$(call run, python scripts/check_audio_io.py)
 	$(call run, python scripts/vc_to_f.py)
+# --------------------------------------------------------
+# Container
+# --------------------------------------------------------
+init:
+	@pulseaudio -D --exit-idle-time=-1 
+	@pacmd load-module module-pipe-sink file=/dev/audio format=s16 rate=44100 channels=2
+	@tmux
+runner: ## [tmux]
+	@tmux split-window -v
+	@tmux select-pane -t 0
+	@tmux send-keys "socat file:/dev/audio tcp-listen:3000" Enter
+	@tmux select-pane -t 1
+	@tmux send-keys "python3 scripts/vc_to_f.py" Enter
+# --------------------------------------------------------
+# TEST
+# --------------------------------------------------------
+# host
+rec:
+	rec --encoding signed-integer -traw --bits 16 --channels 2 --rate 44100 - | nc 127.0.0.1 3000 > /dev/null
 
-inside-docker:
-	echo "TBD"
-outside-docker: ## [python] local VC checker
-	python3 scripts/vc_to_f.py
-
-
+# container
+in:
+	docker build -t mictest -f ./Dockerfile.test .
+	docker run -p 127.0.0.1:3000:3000 -v $(PWD):/work -it mictest
+container:
+	@pulseaudio -D --exit-idle-time=-1
+	@pacmd load-module module-pipe-source file=/dev/audio format=s16 rate=44100 channels=2
+	@socat tcp-listen:3000 file:/dev/audio &
+	@python scripts/vc_to_f.py
+#@arecord ./test.wav
 # ====================
 # Audio commands
 # ====================
-export SOUNDFILE=./src/pc.wav
+export SOUNDFILE=test.wav
+#./src/pc.wav
 # ↑ mp3は鳴らない(というかバグる)
 
 # for Ubuntu

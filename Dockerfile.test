@@ -1,0 +1,6 @@
+FROM ubuntu
+
+RUN apt-get update && apt-get install -y pulseaudio socat alsa-utils
+
+EXPOSE 3000
+WORKDIR /work

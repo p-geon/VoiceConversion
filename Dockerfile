@@ -30,10 +30,17 @@ RUN pip install -r requirements.txt -q
 
 # additional layers
 #RUN apt-get install -y -q alsa-base alsa-utils
+RUN apt-get install -y -q --no-install-recommends \
+	socat \
+	alsa-utils
+
+# conf
+COPY ./config/.tmux.conf /root/.tmux.conf
+USER root
 
 # finalize
-##ARG EXPOSED_PORT
-##EXPOSE ${EXPOSED_PORT}
+ARG EXPOSED_PORT
+EXPOSE ${EXPOSED_PORT}
 WORKDIR /work
 CMD ["/bin/bash"]
 
