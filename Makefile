@@ -12,25 +12,30 @@ br: ## [docker] build & run
 b: ## [docker] build container
 	docker build -f ./Dockerfile \
 		-t $(NAME_CONTAINER) .
-#--build-arg EXPOSED_PORT=$(EXPOSED_PORT)
+
+define run
+	docker run -it --rm \
+		-v $(PWD):/work/ \
+		-v ~/.config/pulse:/root/.config/pulse \
+		-e PULSE_SERVER=docker.for.mac.localhost \
+		--device=/dev/snd \
+		$(NAME_CONTAINER) \
+		$(1)
+endef
+r: ## [docker] alias
+	make ring
 
 ring: ## [docker] run sound
-	docker run -it --rm \
-		-v $(PWD):/work/ \
-		-v ~/.config/pulse:/root/.config/pulse \
-		-e PULSE_SERVER=docker.for.mac.localhost \
-		$(NAME_CONTAINER) \
-		make aplay
-r: 
-	make ring
-	
+	$(call run, make aplay)
 app: ## [docker] run script
-	docker run -it --rm \
-		-v $(PWD):/work/ \
-		-v ~/.config/pulse:/root/.config/pulse \
-		-e PULSE_SERVER=docker.for.mac.localhost \
-		$(NAME_CONTAINER) \
-		python scripts/check_audio_io.py
+	#$(call run, python scripts/check_audio_io.py)
+	$(call run, python scripts/vc_to_f.py)
+
+inside-docker:
+	echo "TBD"
+outside-docker: ## [python] local VC checker
+	python3 scripts/vc_to_f.py
+
 
 # ====================
 # Audio commands
@@ -41,6 +46,7 @@ export SOUNDFILE=./src/pc.wav
 # for Ubuntu
 audio-env: ## [sound] check Audio card
 	aplay -l
+
 aplay: ## [sound] ringing sound, framerate(44.1kHz), channels(2)
 	aplay $(SOUNDFILE) -r 44100 -c 2
 # ---

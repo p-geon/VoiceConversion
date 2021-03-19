@@ -21,14 +21,15 @@ RUN apt-get install -y -q --no-install-recommends \
 RUN apt-get install -y -q --no-install-recommends \
     pulseaudio \
 	alsa-utils
-##socat \
-##ffmpeg \
 
 # Python Layer
 RUN pip install -q --upgrade pip
 RUN apt-get install -y -q --no-install-recommends \
 	portaudio19-dev
 RUN pip install -r requirements.txt -q
+
+# additional layers
+#RUN apt-get install -y -q alsa-base alsa-utils
 
 # finalize
 ##ARG EXPOSED_PORT
