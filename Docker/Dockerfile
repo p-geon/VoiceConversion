@@ -21,7 +21,8 @@ RUN apt-get install -y -q --no-install-recommends \
 # > pulseaudio: コネクション
 # > alsa-utils: aplayに必要
 RUN apt-get install -y -q --no-install-recommends \
-    pulseaudio
+    pulseaudio \
+	alsa-utils
 
 # Python Layer
 RUN pip install -q --upgrade pip
@@ -29,22 +30,8 @@ RUN apt-get install -y -q --no-install-recommends \
 	portaudio19-dev
 RUN pip install -r requirements.txt -q
 
-# additional layers
-RUN apt-get install -y -q --no-install-recommends \
-	alsa-utils
-#	socat \
-
-# conf
-#COPY ./config/.tmux.conf /root/.tmux.conf
-#ENV USER_DOCKER=pigeolian
-#RUN useradd -m ${USER_DOCKER}
-#RUN gpasswd -a ${USER_DOCKER} sudo
-#USER ${USER_DOCKER}
-
 # finalize
-#ARG EXPOSED_PORT
+USER root
 EXPOSE 3000
 WORKDIR /work
 CMD ["/bin/bash"]
-
-## 60±5sec (mac)

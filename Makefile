@@ -4,25 +4,25 @@ export HOSTNAME=pigeon
 # mp3は鳴らない(というかバグる)
 export SOUNDFILE=./src/pc.wav
 ## host/host to container
-export UNAME=root
 include ./utils/Makefile
 # ========================================
 # sound: container -> host
 # ========================================
-bs: ## docker/Build-Server
+bs: ## docker/build & run
 	docker build -f ./Docker/Dockerfile.test \
 		-t $(NAME_CONTAINER) .
 	docker run -it --rm \
-		-v $(PWD):/work/ \
 		-e PULSE_SERVER=docker.for.mac.localhost \
-		-v ~/.config/pulse:/$(UNAME)/.config/pulse \
+		-v $(PWD):/work/ \
+		-v ~/.config/pulse:/root/.config/pulse \
 		$(NAME_CONTAINER)
 
-server: ## docker/server
+server: ## docker/setup server
 	@pulseaudio -D --exit-idle-time=-1 
 	@pacmd load-module module-pipe-sink file=/dev/audio format=s16 rate=44100 channels=2
+	@make aplay
 
-host: ## host/host settings
+host: ## host/setting host
 	brew install pulseaudio
 	pulseaudio --load=module-native-protocol-tcp \
 		--exit-idle-time=-1 --daemon
