@@ -10,7 +10,13 @@
 
 ## Modules
 
+mac
+
 - pulseaudio: サウンドサーバー
+- sox
+
+Ubuntu
+
 - alsa-utils: 
 
 ## 音源

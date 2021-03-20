@@ -8,11 +8,11 @@ include ./utils/Makefile
 # ========================================
 # sound: container -> host
 # ========================================
-bs: ## docker/build & run
-	docker build -f ./Docker/Dockerfile.test \
+b: ## docker/build & run
+	docker build -f ./Docker/Dockerfile \
 		-t $(NAME_CONTAINER) .
+r:
 	docker run -it --rm \
-		-e PULSE_SERVER=docker.for.mac.localhost \
 		-v $(PWD):/work/ \
 		-v ~/.config/pulse:/root/.config/pulse \
 		$(NAME_CONTAINER)
@@ -24,10 +24,26 @@ server: ## docker/setup server
 
 host: ## host/setting host
 	brew install pulseaudio
-	pulseaudio --load=module-native-protocol-tcp \
-		--exit-idle-time=-1 --daemon
+	pulseaudio --load=module-native-protocol-tcp --exit-idle-time=-1 --daemon
 	pulseaudio --check -v
 
-aplay: ## sound::ringing sound, framerate(44.1kHz), channels(2)
+play: ## sound/ring sound, framerate(44.1kHz), channels(2)
 	aplay $(SOUNDFILE) -r 44100 -c 2
 
+beep: ## sound/ring beep
+	echo -ne '\007'
+
+# ========================================
+# pulseaudio
+# ========================================
+
+p:
+	pulseaudio --start
+	pulseaudio --check -v
+	ps | grep pulse	
+
+pc:
+	ls ~/.config/pulse
+
+reset:
+	rm ~/.config/pulse/*
