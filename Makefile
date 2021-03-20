@@ -22,6 +22,10 @@ r:
 		-p 3000:3000 \
 		$(NAME_CONTAINER)
 
+run:
+	docker run -it --rm \
+		$(NAME_CONTAINER)
+
 server: ## docker/setup server
 	@pulseaudio -D --exit-idle-time=-1 
 	@pacmd load-module module-pipe-sink file=/dev/audio format=s16 rate=44100 channels=2
@@ -42,25 +46,29 @@ beep: ## sound/ring beep
 # ========================================
 init: ## host/setting host
 	brew install pulseaudio
-	pulseaudio -v
+	make check
 
 purge:
 	brew uninstall pulseaudio
-	pulseaudio -v
+	make check
 
 daemon:
 	pulseaudio --load=module-native-protocol-tcp --exit-idle-time=-1 --daemon
-	pulseaudio --check -v
+	make check
 
 remove-cache:
 	ls ~/.config/pulse
 	rm ~/.config/pulse/*
 	pulseaudio --cleanup-shm
+	make check
 
 start:
 	pulseaudio --start
-	pulseaudio --check -v
+	make check
 
 kill:
 	pulseaudio --kill
+	make check
+
+check:
 	pulseaudio --check -v
