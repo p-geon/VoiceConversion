@@ -20,6 +20,7 @@ RUN apt-get install -y -q --no-install-recommends \
 # Audio Layer
 # > pulseaudio: コネクション
 # > alsa-utils: aplayに必要
+#ENV PULSE_SERVER=docker.for.mac.localhost
 RUN apt-get install -y -q --no-install-recommends \
     pulseaudio \
 	alsa-utils
@@ -29,12 +30,6 @@ RUN pip install -q --upgrade pip
 RUN apt-get install -y -q --no-install-recommends \
 	portaudio19-dev
 RUN pip install -r requirements.txt -q
-
-
-ENV PULSE_SERVER=docker.for.mac.localhost
-
-#RUN gpasswd -a user pulse-access
-#RUN gpasswd -a root pulse-access
 
 # finalize
 USER root
