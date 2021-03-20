@@ -84,6 +84,7 @@ audio-env: ## [sound] check Audio card
 
 aplay: ## [sound] ringing sound, framerate(44.1kHz), channels(2)
 	aplay $(SOUNDFILE) -r 44100 -c 2
+#aplay Kurzweil-K2000-Dual-Bass-C1.wav
 
 # ====================
 # mac
@@ -98,6 +99,7 @@ setup-mac:
 
 run-host: ## [sound] connect container->mac
 	ps -ax | grep pulse
+	pacmd load-module module-native-protocol-unix socket=/tmp/pulseaudio.socket
 	pulseaudio --load=module-native-protocol-tcp --exit-idle-time=-1 --daemon --system
 	pulseaudio --check -v
 	pulseaudio --start
@@ -124,11 +126,18 @@ ring1:
 	docker run -it --rm \
 		-v $(PWD):/work/ \
 		-v ~/.config/pulse:/$(UNAME)/.config/pulse \
-		-e PULSE_SERVER=192.168.10.23 \
 		mictest
 
+# 		--user $(id -u):$(id -g) \
 # -e PULSE_SERVER=docker.for.mac.localhost \
-# aplay $(SOUNDFILE) -r 44100 -c 2 --device=defaul
+# -e PULSE_SERVER=unix:/tmp/pulseaudio.socket \
+# -e PULSE_COOKIE=/tmp/pulseaudio.cookie \
+#-v /tmp/pulseaudio.client.conf:/etc/pulse/client.conf \
+# -v /tmp/pulseaudio.socket:/tmp/pulseaudio.socket \
+#aplay $(SOUNDFILE) -r 44100 -c 2 --device=defaul
+
+# 
+# 
 # -p 127.0.0.1:3000:3000 \
 
 # ====================
