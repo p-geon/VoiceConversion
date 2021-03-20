@@ -1,4 +1,4 @@
 __pycache__
 *.mp3
 *.wav
-scripts/vc_to_f.py
+scripts/echo.py
