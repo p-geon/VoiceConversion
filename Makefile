@@ -59,44 +59,48 @@ runner: ## [tmux]
 # make d
 
 # container
-a:
-	make build
-	make run
-b:
-	@pulseaudio -D --exit-idle-time=-1
-	@pacmd load-module module-pipe-source file=/dev/audio format=s16 rate=44100 channels=2
-	@socat tcp-listen:3000 file:/dev/audio &
-c1:
-	arecord /work/test.wav
-c2:
-	python3 scripts/vc_to_f.py
-d:
-	rec --encoding signed-integer -traw --bits 16 --channels 2 --rate 44100 - | nc 127.0.0.1 3000 > /dev/null
+# a:
+# 	make build
+# 	make run
+# b:
+# 	@pulseaudio -D --exit-idle-time=-1
+# 	@pacmd load-module module-pipe-source file=/dev/audio format=s16 rate=44100 channels=2
+# 	@socat tcp-listen:3000 file:/dev/audio &
+# c1:
+# 	arecord /work/test.wav
+# c2:
+# 	python3 scripts/vc_to_f.py
+# d:
+# 	rec --encoding signed-integer -traw --bits 16 --channels 2 --rate 44100 - | nc 127.0.0.1 3000 > /dev/null
 #@arecord ./test.wav
 # ====================
-# Audio commands
+# ubuntu
 # ====================
+# mp3は鳴らない(というかバグる)
 export SOUNDFILE=./src/pc.wav
-# ↑ mp3は鳴らない(というかバグる)
 
-# for Ubuntu
 audio-env: ## [sound] check Audio card
 	aplay -l
 
 aplay: ## [sound] ringing sound, framerate(44.1kHz), channels(2)
 	aplay $(SOUNDFILE) -r 44100 -c 2
-# ---
-# for mac
+
+# ====================
+# mac
+# ====================
 play-on-mac: ## [sound] ringing for mac
 	afplay $(SOUNDFILE)
 setup-mac:
 	brew install sox
 	brew install pulseaudio
 	brew services start pulseaudio
+	brew service restart pulseaudio
+
 run-host: ## [sound] connect container->mac
-	pulseaudio --load=module-native-protocol-tcp \
-		--exit-idle-time=-1 --daemon
-		pulseaudio --check -v
+	ps -ax | grep pulse
+	pulseaudio --load=module-native-protocol-tcp --exit-idle-time=-1 --daemon --system
+	pulseaudio --check -v
+	pulseaudio --start
 
 # ====================
 # docker commands
@@ -110,6 +114,22 @@ clean-images:
 	docker rmi $(NONE_DOCKER_IMAGES) -f
 clean-containers:
 	docker rm -f $(STOPPED_DOCKER_CONTAINERS)
+
+# ====================
+# ringing: container -> host
+# ====================
+export UNAME=root
+ring1:
+	docker build -f ./Dockerfile.test -t mictest .
+	docker run -it --rm \
+		-v $(PWD):/work/ \
+		-v ~/.config/pulse:/$(UNAME)/.config/pulse \
+		-e PULSE_SERVER=192.168.10.23 \
+		mictest
+
+# -e PULSE_SERVER=docker.for.mac.localhost \
+# aplay $(SOUNDFILE) -r 44100 -c 2 --device=defaul
+# -p 127.0.0.1:3000:3000 \
 
 # ====================
 # General Purpose

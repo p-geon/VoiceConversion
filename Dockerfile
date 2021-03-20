@@ -12,12 +12,14 @@ COPY ${DIR_DOCKER}/requirements.txt ./
 ENV TZ="Asia/Tokyo"
 RUN apt-get update -y -q
 RUN apt-get install -y -q --no-install-recommends tzdata
+#
 RUN apt-get install -y -q --no-install-recommends \
     wget \
 	tmux
+
 # Audio Layer
-#> pulseaudio: コネクション
-#> alsa-utils: aplayに必要
+# > pulseaudio: コネクション
+# > alsa-utils: aplayに必要
 RUN apt-get install -y -q --no-install-recommends \
     pulseaudio
 
